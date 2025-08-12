@@ -10,9 +10,9 @@ import {
     RefreshControl
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ThemedText } from '../components/ThemedText';
-import { ThemedView } from '../components/ThemedView';
-import { Colors } from '../constants/Colors';
+import { ThemedText } from '../../components/ThemedText';
+import { ThemedView } from '../../components/ThemedView';
+import { Colors } from '../../constants/Colors';
 import { useColorScheme } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');

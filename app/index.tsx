@@ -58,7 +58,7 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       if (AUTH_STATE.isLoggedIn) {
         // User is logged in - go to feed
-        router.replace('/feed');
+        router.replace('/(tabs)/feed');
       } else {
         // User is not logged in - go to onboarding
         router.replace('/onboarding');

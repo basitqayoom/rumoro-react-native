@@ -139,7 +139,7 @@ export default function OnboardingScreen() {
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             // Navigate to feed on success
-            router.replace('/feed');
+            router.replace('/(tabs)/feed');
         } catch {
             Alert.alert('Error', 'Invalid OTP. Please try again.');
             setOtp(['', '', '', '', '', '']);
@@ -156,7 +156,7 @@ export default function OnboardingScreen() {
             // Simulate Google Sign-In
             await new Promise(resolve => setTimeout(resolve, 2000));
             Alert.alert('Success', 'Google Sign-In successful!', [
-                { text: 'OK', onPress: () => router.replace('/feed') }
+                { text: 'OK', onPress: () => router.replace('/(tabs)/feed') }
             ]);
         } catch {
             Alert.alert('Error', 'Google Sign-In failed. Please try again.');
