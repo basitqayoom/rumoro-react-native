@@ -9,7 +9,7 @@ type ThemedViewProps = ViewProps & {
 };
 
 export function ThemedView({
-    style,
+    style, 
     lightColor,
     darkColor,
     variant = 'default',
