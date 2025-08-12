@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "name": "Rumoro Tokens",
+    "version": "0.1",
+    "date": "2025-08-12"
+  },
+  "color": {
+    "primary": {
+      "50": "#FFF0F3",
+      "100": "#FFE3E8",
+      "400": "#FF6B86",
+      "500": "#FF4D6D",
+      "600": "#E03A58",
+      "700": "#C12A49"
+    },
+    "accent": {
+      "100": "#FFE8CE",
+      "500": "#F4A261"
+    },
+    "neutral": {
+      "ink900": "#111114",
+      "ink700": "#2B2E3A",
+      "muted500": "#6B7280",
+      "line300": "#E5E7EB",
+      "surface0": "#FFFFFF",
+      "surfaceAlt": "#F8F9FB"
+    },
+    "dark": {
+      "surfaceD0": "#101114",
+      "surfaceD1": "#171821",
+      "lineD": "#2A2D34",
+      "inkD": "#F5F6FA",
+      "mutedD": "#9CA3AF"
+    },
+    "semantic": {
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "danger": "#EF4444",
+      "info": "#3B82F6"
+    }
+  },
+  "typography": {
+    "display": "Sora",
+    "ui": "Inter",
+    "scale": {
+      "h1": [
+        28,
+        34
+      ],
+      "h2": [
+        22,
+        28
+      ],
+      "h3": [
+        18,
+        24
+      ],
+      "body": [
+        16,
+        22
+      ],
+      "sub": [
+        14,
+        20
+      ],
+      "caption": [
+        12,
+        16
+      ]
+    }
+  },
+  "space": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    40
+  ],
+  "radius": {
+    "card": 12,
+    "sheet": 16,
+    "modalTop": 28,
+    "pill": 999
+  },
+  "elevation": {
+    "0": "none",
+    "1": "0 2 8 rgba(0,0,0,0.08)",
+    "2": "0 6 20 rgba(0,0,0,0.12)",
+    "3": "0 10 32 rgba(0,0,0,0.16)"
+  },
+  "motion": {
+    "durations": {
+      "fast": 90,
+      "snappy": 150,
+      "base": 200,
+      "emphasized": 300
+    },
+    "easing": {
+      "standard": "cubic-bezier(0.2,0.8,0.2,1)",
+      "out": "ease-out",
+      "in": "ease-in"
+    }
+  }
+}

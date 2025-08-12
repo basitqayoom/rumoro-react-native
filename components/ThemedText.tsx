@@ -1,60 +1,56 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import React from 'react';
+import { Text, TextProps, useColorScheme } from 'react-native';
+import { Colors } from '../constants/Colors';
+import { Typography } from '../constants/Typography';
 
-import { useThemeColor } from '@/hooks/useThemeColor';
-
-export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+type ThemedTextProps = TextProps & {
+    lightColor?: string;
+    darkColor?: string;
+    type?: 'h1' | 'h2' | 'h3' | 'h4' | 'subtitle' | 'body' | 'bodySmall' | 'caption' | 'button';
+    variant?: 'primary' | 'secondary' | 'muted' | 'accent' | 'success' | 'warning' | 'danger';
 };
 
 export function ThemedText({
-  style,
-  lightColor,
-  darkColor,
-  type = 'default',
-  ...rest
+    style,
+    lightColor,
+    darkColor,
+    type = 'body',
+    variant = 'primary',
+    ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+    const theme = useColorScheme() ?? 'light';
 
-  return (
-    <Text
-      style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        style,
-      ]}
-      {...rest}
-    />
-  );
+    const getTextColor = () => {
+        if (lightColor || darkColor) {
+            return theme === 'light' ? lightColor : darkColor;
+        }
+
+        switch (variant) {
+            case 'secondary':
+                return Colors[theme].textSecondary;
+            case 'muted':
+                return Colors[theme].textMuted;
+            case 'accent':
+                return Colors[theme].accent[500];
+            case 'success':
+                return Colors[theme].success;
+            case 'warning':
+                return Colors[theme].warning;
+            case 'danger':
+                return Colors[theme].danger;
+            default:
+                return Colors[theme].text;
+        }
+    };
+
+    return (
+        <Text
+            style={[
+                Typography.scale[type],
+                { color: getTextColor() },
+                style,
+            ]}
+            {...rest}
+        />
+    );
 }
-
-const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
-  },
-});
