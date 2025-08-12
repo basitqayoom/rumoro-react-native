@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Colors, tokens } from '../../constants/Colors';
 import { ThemedText } from '../ThemedText';
+import { GoogleIcon } from './GoogleIcon';
 import { Icon } from './Icon';
 
 type ButtonProps = TouchableOpacityProps & {
@@ -127,6 +128,11 @@ export function Button({
                 <ActivityIndicator
                     size="small"
                     color={getTextColor()}
+                    style={{ marginRight: title ? tokens.spacing.sm : 0 }}
+                />
+            ) : iconName === 'google' ? (
+                <GoogleIcon
+                    size={iconSize}
                     style={{ marginRight: title ? tokens.spacing.sm : 0 }}
                 />
             ) : iconName ? (

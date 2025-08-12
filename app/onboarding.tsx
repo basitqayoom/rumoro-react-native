@@ -17,7 +17,7 @@ import { ThemedText } from '../components/ThemedText';
 import { Button } from '../components/ui/Button';
 import { CountryCodePicker, DEFAULT_COUNTRY } from '../components/ui/CountryCodePicker';
 import { Icon } from '../components/ui/Icon';
-import Logo from '../components/ui/Logo';
+import { Logo } from '../components/ui/Logo';
 
 const { width: screenWidth } = Dimensions.get('window');
 
