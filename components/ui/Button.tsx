@@ -4,10 +4,12 @@ import {
     TouchableOpacity,
     TouchableOpacityProps,
     useColorScheme,
+    View,
     ViewStyle,
 } from 'react-native';
 import { Colors, tokens } from '../../constants/Colors';
 import { ThemedText } from '../ThemedText';
+import { Icon } from './Icon';
 
 type ButtonProps = TouchableOpacityProps & {
     title?: string;
@@ -16,6 +18,9 @@ type ButtonProps = TouchableOpacityProps & {
     size?: 'sm' | 'md' | 'lg';
     loading?: boolean;
     fullWidth?: boolean;
+    iconName?: string;
+    iconColor?: string;
+    iconSize?: number;
 };
 
 export function Button({
@@ -27,6 +32,9 @@ export function Button({
     fullWidth = false,
     disabled,
     style,
+    iconName,
+    iconColor,
+    iconSize = 20,
     ...rest
 }: ButtonProps) {
     const theme = useColorScheme() ?? 'light';
@@ -115,14 +123,25 @@ export function Button({
             activeOpacity={0.8}
             {...rest}
         >
-            {loading && (
+            {loading ? (
                 <ActivityIndicator
                     size="small"
                     color={getTextColor()}
-                    style={{ marginRight: tokens.spacing.sm }}
+                    style={{ marginRight: title ? tokens.spacing.sm : 0 }}
                 />
-            )}
-            {children || (
+            ) : iconName ? (
+                <Icon
+                    name={iconName}
+                    size={iconSize}
+                    color={iconColor || getTextColor()}
+                    style={{ marginRight: title ? tokens.spacing.sm : 0 }}
+                />
+            ) : children ? (
+                <View style={{ marginRight: title ? tokens.spacing.sm : 0 }}>
+                    {children}
+                </View>
+            ) : null}
+            {title && (
                 <ThemedText
                     type="button"
                     style={{ color: getTextColor() }}

@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import {
   Animated,
@@ -29,6 +30,11 @@ const SPLASH_CONFIG = {
   animationDuration: 800,
 };
 
+// Auth state - for now set to false (will be replaced with actual auth logic later)
+const AUTH_STATE = {
+  isLoggedIn: false,
+};
+
 export default function SplashScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
@@ -48,10 +54,15 @@ export default function SplashScreen() {
       }),
     ]).start();
 
-    // Navigate to next screen after display duration
+    // Navigate to appropriate screen based on auth state
     const timer = setTimeout(() => {
-      // TODO: Navigate to main app or auth screen
-      console.log('Navigate to next screen');
+      if (AUTH_STATE.isLoggedIn) {
+        // User is logged in - go to feed
+        router.replace('/feed');
+      } else {
+        // User is not logged in - go to onboarding
+        router.replace('/onboarding');
+      }
     }, SPLASH_CONFIG.displayDuration);
 
     return () => clearTimeout(timer);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, View, ViewStyle } from 'react-native';
+import { Image, ImageStyle, View, ViewStyle } from 'react-native';
 
 // Design tokens from copilot/design_tokens.json
 const colors = {
@@ -124,7 +124,7 @@ export const Logo: React.FC<LogoProps> = ({
         overflow: 'hidden', // Ensure circular cropping
     };
 
-    const imageStyle: ViewStyle = {
+    const imageStyle: ImageStyle = {
         width: config.containerSize * 1.2, // 120% of container to zoom in and crop
         height: config.containerSize * 1.2,
         borderRadius: config.containerSize * 0.6, // Keep circular
