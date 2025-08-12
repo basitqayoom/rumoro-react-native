@@ -6,6 +6,7 @@ import {
     Dimensions,
     KeyboardAvoidingView,
     Platform,
+    ScrollView,
     StatusBar,
     StyleSheet,
     TextInput,
@@ -247,53 +248,60 @@ export default function OnboardingScreen() {
                 <ThemedText style={styles.backText}>Back</ThemedText>
             </TouchableOpacity>
 
-            <View style={styles.header}>
-                <View style={styles.stepIcon}>
-                    <Icon name="phone" size={28} color={colors.primary[500]} />
-                </View>
-                <ThemedText type="h2" style={styles.title}>
-                    Enter your phone number
-                </ThemedText>
-                <ThemedText type="body" style={styles.subtitle}>
-                    We&apos;ll send you a verification code to confirm your identity
-                </ThemedText>
-            </View>
+            <KeyboardAvoidingView
+                style={styles.inputScreenContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.inputScrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.compactHeader}>
+                        <ThemedText type="h2" style={styles.compactTitle}>
+                            Enter your phone number
+                        </ThemedText>
+                    </View>
 
-            <View style={styles.inputSection}>
-                <View style={styles.phoneInputContainer}>
-                    <CountryCodePicker
-                        selectedCountry={selectedCountry}
-                        onSelectCountry={setSelectedCountry}
+                    <View style={styles.inputSection}>
+                        <View style={styles.phoneInputContainer}>
+                            <CountryCodePicker
+                                selectedCountry={selectedCountry}
+                                onSelectCountry={setSelectedCountry}
+                            />
+                            <TextInput
+                                style={styles.phoneInput}
+                                placeholder="Phone number"
+                                value={phoneNumber}
+                                onChangeText={setPhoneNumber}
+                                keyboardType="phone-pad"
+                                maxLength={selectedCountry.maxLength}
+                                autoFocus
+                            />
+                        </View>
+
+                        <View style={styles.helpText}>
+                            <Icon name="info" size={14} color={colors.neutral.ink600} />
+                            <ThemedText type="caption" style={styles.helpTextContent}>
+                                Standard messaging rates may apply
+                            </ThemedText>
+                        </View>
+                    </View>
+                </ScrollView>
+
+                <View style={styles.buttonContainer}>
+                    <Button
+                        title="Send Verification Code"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
+                        loading={loading}
+                        onPress={handlePhoneSubmit}
+                        disabled={!phoneNumber.trim()}
                     />
-                    <TextInput
-                        style={styles.phoneInput}
-                        placeholder="Phone number"
-                        value={phoneNumber}
-                        onChangeText={setPhoneNumber}
-                        keyboardType="phone-pad"
-                        maxLength={selectedCountry.maxLength}
-                        autoFocus
-                    />
                 </View>
-
-                <View style={styles.helpText}>
-                    <Icon name="info" size={14} color={colors.neutral.ink600} />
-                    <ThemedText type="caption" style={styles.helpTextContent}>
-                        Standard messaging rates may apply
-                    </ThemedText>
-                </View>
-            </View>
-
-            <Button
-                title="Send Verification Code"
-                variant="primary"
-                size="lg"
-                fullWidth
-                loading={loading}
-                onPress={handlePhoneSubmit}
-                disabled={!phoneNumber.trim()}
-                style={styles.submitButton}
-            />
+            </KeyboardAvoidingView>
         </View>
     );
 
@@ -308,76 +316,86 @@ export default function OnboardingScreen() {
                 <ThemedText style={styles.backText}>Back</ThemedText>
             </TouchableOpacity>
 
-            <View style={styles.header}>
-                <View style={styles.stepIcon}>
-                    <Icon name="lock" size={28} color={colors.primary[500]} />
-                </View>
-                <ThemedText type="h2" style={styles.title}>
-                    Enter verification code
-                </ThemedText>
-                <ThemedText type="body" style={styles.subtitle}>
-                    We sent a 6-digit code to {selectedCountry.dialCode} {phoneNumber}
-                </ThemedText>
-            </View>
-
-            <View style={styles.inputSection}>
-                <View style={styles.otpContainer}>
-                    {otp.map((digit, index) => (
-                        <TextInput
-                            key={index}
-                            ref={(ref) => {
-                                if (ref) otpInputs.current[index] = ref;
-                            }}
-                            style={[
-                                styles.otpInput,
-                                digit && styles.otpInputFilled,
-                            ]}
-                            value={digit}
-                            onChangeText={(value) => handleOtpChange(value, index)}
-                            keyboardType="number-pad"
-                            maxLength={1}
-                            textAlign="center"
-                        />
-                    ))}
-                </View>
-
-                <TouchableOpacity
-                    onPress={handleResendOtp}
-                    disabled={resendTimer > 0}
-                    style={styles.resendButton}
+            <KeyboardAvoidingView
+                style={styles.inputScreenContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.inputScrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
                 >
-                    <Icon
-                        name="refresh"
-                        size={16}
-                        color={resendTimer > 0 ? colors.neutral.ink600 : colors.primary[600]}
-                        style={styles.resendIcon}
+                    <View style={styles.compactHeader}>
+                        <ThemedText type="h2" style={styles.compactTitle}>
+                            Enter verification code
+                        </ThemedText>
+                        <ThemedText type="caption" style={styles.compactSubtitle}>
+                            Code sent to {selectedCountry.dialCode} {phoneNumber}
+                        </ThemedText>
+                    </View>
+
+                    <View style={styles.inputSection}>
+                        <View style={styles.otpContainer}>
+                            {otp.map((digit, index) => (
+                                <TextInput
+                                    key={index}
+                                    ref={(ref) => {
+                                        if (ref) otpInputs.current[index] = ref;
+                                    }}
+                                    style={[
+                                        styles.otpInput,
+                                        digit && styles.otpInputFilled,
+                                    ]}
+                                    value={digit}
+                                    onChangeText={(value) => handleOtpChange(value, index)}
+                                    keyboardType="number-pad"
+                                    maxLength={1}
+                                    textAlign="center"
+                                />
+                            ))}
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={handleResendOtp}
+                            disabled={resendTimer > 0}
+                            style={styles.resendButton}
+                        >
+                            <Icon
+                                name="refresh"
+                                size={16}
+                                color={resendTimer > 0 ? colors.neutral.ink600 : colors.primary[600]}
+                                style={styles.resendIcon}
+                            />
+                            <ThemedText style={[
+                                styles.resendText,
+                                resendTimer > 0 && styles.resendTextDisabled,
+                            ]}>
+                                {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
+                            </ThemedText>
+                        </TouchableOpacity>
+
+                        <View style={styles.helpText}>
+                            <Icon name="info" size={14} color={colors.neutral.ink600} />
+                            <ThemedText type="caption" style={styles.helpTextContent}>
+                                Didn&apos;t receive the code? Check your spam folder
+                            </ThemedText>
+                        </View>
+                    </View>
+                </ScrollView>
+
+                <View style={styles.buttonContainer}>
+                    <Button
+                        title="Verify & Continue"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
+                        loading={loading}
+                        onPress={() => handleOtpVerification()}
+                        disabled={otp.some(digit => !digit)}
                     />
-                    <ThemedText style={[
-                        styles.resendText,
-                        resendTimer > 0 && styles.resendTextDisabled,
-                    ]}>
-                        {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
-                    </ThemedText>
-                </TouchableOpacity>
-
-                <View style={styles.helpText}>
-                    <Icon name="info" size={14} color={colors.neutral.ink600} />
-                    <ThemedText type="caption" style={styles.helpTextContent}>
-                        Didn&apos;t receive the code? Check your spam folder
-                    </ThemedText>
                 </View>
-            </View>
-
-            <Button
-                title="Verify & Continue"
-                variant="primary"
-                size="lg"
-                fullWidth
-                loading={loading}
-                onPress={() => handleOtpVerification()}
-                disabled={otp.some(digit => !digit)}
-                style={styles.submitButton}
-            />
+            </KeyboardAvoidingView>
         </View>
     );
 
@@ -385,30 +403,24 @@ export default function OnboardingScreen() {
         <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.neutral.surface0} />
 
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            <Animated.View
+                style={[
+                    styles.stepsWrapper,
+                    {
+                        transform: [{ translateX: slideAnim }],
+                    },
+                ]}
             >
-                <Animated.View
-                    style={[
-                        styles.stepsWrapper,
-                        {
-                            transform: [{ translateX: slideAnim }],
-                        },
-                    ]}
-                >
-                    <View style={styles.step}>
-                        {renderAuthSelection()}
-                    </View>
-                    <View style={styles.step}>
-                        {renderPhoneInput()}
-                    </View>
-                    <View style={styles.step}>
-                        {renderOtpVerification()}
-                    </View>
-                </Animated.View>
-            </KeyboardAvoidingView>
+                <View style={styles.step}>
+                    {renderAuthSelection()}
+                </View>
+                <View style={styles.step}>
+                    {renderPhoneInput()}
+                </View>
+                <View style={styles.step}>
+                    {renderOtpVerification()}
+                </View>
+            </Animated.View>
         </SafeAreaView>
     );
 }
@@ -435,8 +447,13 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        paddingTop: 40,
-        paddingBottom: 32,
+        paddingTop: 20,
+        paddingBottom: 24,
+    },
+    compactHeader: {
+        alignItems: 'center',
+        paddingTop: 20,
+        paddingBottom: 24,
     },
     logoContainer: {
         marginBottom: 24,
@@ -459,12 +476,26 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         lineHeight: 34,
     },
+    compactTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: colors.primary[700],
+        textAlign: 'center',
+        marginBottom: 8,
+        lineHeight: 28,
+    },
     subtitle: {
         fontSize: 16,
         color: colors.neutral.ink600,
         textAlign: 'center',
         lineHeight: 24,
         paddingHorizontal: 16,
+    },
+    compactSubtitle: {
+        fontSize: 14,
+        color: colors.neutral.ink600,
+        textAlign: 'center',
+        lineHeight: 20,
     },
     buttonContainer: {
         gap: 16,
@@ -503,9 +534,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-start',
-        padding: 12,
+        padding: 8,
         marginTop: 8,
-        marginBottom: 8,
+        marginBottom: 16,
+        marginLeft: -8, // Align with screen edge accounting for padding
     },
     backText: {
         fontSize: 16,
@@ -514,7 +546,8 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     inputSection: {
-        paddingVertical: 24,
+        paddingVertical: 16,
+        minHeight: 150, // Reduced height for better positioning
     },
     phoneInputContainer: {
         flexDirection: 'row',
@@ -584,5 +617,23 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         marginBottom: 40,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'flex-start', // Changed from space-between to flex-start
+        paddingBottom: 20,
+    },
+    inputScreenContainer: {
+        flex: 1,
+    },
+    inputScrollContent: {
+        flexGrow: 1,
+        justifyContent: 'flex-start',
+        paddingBottom: Platform.OS === 'android' ? 300 : 20, // Extra padding for Android keyboard
+    },
+    bottomButtonContainer: {
+        paddingHorizontal: 24,
+        paddingBottom: 40,
+        backgroundColor: colors.neutral.surface0,
     },
 });
