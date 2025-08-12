@@ -14,6 +14,7 @@ import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
 import { Colors } from '../../constants/Colors';
 import { useColorScheme } from 'react-native';
+import NavigationDrawer from '../../components/NavigationDrawer';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -180,6 +181,7 @@ export default function FeedScreen() {
     const [activeTab, setActiveTab] = useState<TabType>('hot');
     const [refreshing, setRefreshing] = useState(false);
     const [followingStatus, setFollowingStatus] = useState<{[key: string]: boolean}>({});
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -318,8 +320,17 @@ export default function FeedScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+            <NavigationDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+            
             <View style={styles.header}>
+                <TouchableOpacity 
+                    style={styles.menuButton}
+                    onPress={() => setIsDrawerOpen(true)}
+                >
+                    <ThemedText style={styles.menuIcon}>☰</ThemedText>
+                </TouchableOpacity>
                 <ThemedText type="h1" style={styles.title}>Rumoro</ThemedText>
+                <View style={styles.headerSpacer} />
             </View>
 
             <View style={[styles.tabBar, { backgroundColor: colors.background }]}>
@@ -363,15 +374,30 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 16,
         borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
     },
+    menuButton: {
+        padding: 8,
+        marginRight: 12,
+    },
+    menuIcon: {
+        fontSize: 24,
+        color: '#111114',
+    },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#FF4D6D',
+        flex: 1,
+        textAlign: 'center',
+    },
+    headerSpacer: {
+        width: 40,
     },
     tabBar: {
         flexDirection: 'row',
