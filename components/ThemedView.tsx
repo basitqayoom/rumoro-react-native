@@ -6,7 +6,7 @@ type ThemedViewProps = ViewProps & {
     lightColor?: string;
     darkColor?: string;
     variant?: 'default' | 'alt' | 'primary' | 'accent';
-};
+};   
 
 export function ThemedView({
     style, 
