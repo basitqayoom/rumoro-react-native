@@ -49,8 +49,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({ isOpen, onClose }) 
     const handleMenuItemPress = (item: MenuItem) => {
         onClose();
         if (item.route) {
-            // Navigation will be handled when routes are set up
-            console.log(`Navigate to ${item.route}`);
+            router.push(item.route as any);
         }
         if (item.action) {
             item.action();
