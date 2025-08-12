@@ -80,7 +80,7 @@ export function Button({
                 baseStyle.borderColor = Colors[theme].border;
                 break;
             case 'outline':
-                baseStyle.backgroundColor = 'transparent';
+                baseStyle.backgroundColor = Colors[theme].background; // Use explicit background instead of transparent
                 baseStyle.borderWidth = 2;
                 baseStyle.borderColor = Colors[theme].primary[500];
                 break;

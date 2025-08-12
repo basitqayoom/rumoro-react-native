@@ -45,13 +45,14 @@ type OnboardingStep = 'auth-selection' | 'phone-input' | 'otp-verification';
 export default function OnboardingScreen() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY);
-    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const [otp, setOtp] = useState(['', '', '', '']);
     const [resendTimer, setResendTimer] = useState(0);
     const [loading, setLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState<OnboardingStep>('auth-selection');
 
     const slideAnim = useRef(new Animated.Value(0)).current;
     const otpInputs = useRef<TextInput[]>([]);
+    const phoneInputRef = useRef<TextInput>(null);
     const insets = useSafeAreaInsets();
 
     // Resend OTP timer effect
@@ -74,6 +75,13 @@ export default function OnboardingScreen() {
             useNativeDriver: true,
         }).start();
         setCurrentStep(step);
+
+        // Focus phone input when navigating to phone input screen
+        if (step === 'phone-input') {
+            setTimeout(() => {
+                phoneInputRef.current?.focus();
+            }, 350); // Small delay after animation
+        }
     };
 
     const getStepIndex = (step: OnboardingStep): number => {
@@ -115,12 +123,12 @@ export default function OnboardingScreen() {
         setOtp(newOtp);
 
         // Auto-focus next input
-        if (value && index < 5) {
+        if (value && index < 3) {
             otpInputs.current[index + 1]?.focus();
         }
 
         // Auto-submit when all fields are filled
-        if (index === 5 && value && newOtp.every(digit => digit !== '')) {
+        if (index === 3 && value && newOtp.every(digit => digit !== '')) {
             handleOtpVerification(newOtp.join(''));
         }
     };
@@ -129,8 +137,8 @@ export default function OnboardingScreen() {
     const handleOtpVerification = async (otpCode?: string) => {
         const finalOtp = otpCode || otp.join('');
 
-        if (finalOtp.length !== 6) {
-            Alert.alert('Error', 'Please enter the complete 6-digit OTP');
+        if (finalOtp.length !== 4) {
+            Alert.alert('Error', 'Please enter the complete 4-digit OTP');
             return;
         }
 
@@ -143,7 +151,7 @@ export default function OnboardingScreen() {
             router.replace('/feed');
         } catch {
             Alert.alert('Error', 'Invalid OTP. Please try again.');
-            setOtp(['', '', '', '', '', '']);
+            setOtp(['', '', '', '']);
             otpInputs.current[0]?.focus();
         } finally {
             setLoading(false);
@@ -271,13 +279,13 @@ export default function OnboardingScreen() {
                                 onSelectCountry={setSelectedCountry}
                             />
                             <TextInput
+                                ref={phoneInputRef}
                                 style={styles.phoneInput}
                                 placeholder="Phone number"
                                 value={phoneNumber}
                                 onChangeText={setPhoneNumber}
                                 keyboardType="phone-pad"
                                 maxLength={selectedCountry.maxLength}
-                                autoFocus
                             />
                         </View>
 
@@ -535,7 +543,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-start',
         padding: 8,
-        marginTop: 8,
+        marginTop: 4,
         marginBottom: 16,
         marginLeft: -8, // Align with screen edge accounting for padding
     },
