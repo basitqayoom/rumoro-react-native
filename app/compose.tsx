@@ -7,7 +7,9 @@ import {
     ScrollView,
     Alert,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Image,
+    ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '../components/ThemedText';
@@ -17,6 +19,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { PRESET_CHANNELS, type Channel } from '../types/models';
 import { Analytics } from '../services/analytics';
+import { pickImage, takePhoto, uploadImage } from '../utils/imageHelper';
+import gossipService from '../services/api/gossip.service';
 
 export default function ComposeScreen() {
     const colorScheme = useColorScheme();
@@ -28,6 +32,9 @@ export default function ComposeScreen() {
     const [gossipContent, setGossipContent] = useState('');
     const [showWarning, setShowWarning] = useState(false);
     const [warningMessage, setWarningMessage] = useState('');
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [isPosting, setIsPosting] = useState(false);
     
     const MAX_CHARACTERS = 800;
     const remainingChars = MAX_CHARACTERS - gossipContent.length;
@@ -84,7 +91,39 @@ export default function ComposeScreen() {
         }
     };
     
-    const handlePost = () => {
+    const handleImagePick = async () => {
+        Alert.alert(
+            'Select Image',
+            'Choose how to add an image',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Take Photo',
+                    onPress: async () => {
+                        const imageUri = await takePhoto();
+                        if (imageUri) {
+                            setSelectedImage(imageUri);
+                        }
+                    }
+                },
+                {
+                    text: 'Choose from Library',
+                    onPress: async () => {
+                        const imageUri = await pickImage();
+                        if (imageUri) {
+                            setSelectedImage(imageUri);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleRemoveImage = () => {
+        setSelectedImage(null);
+    };
+
+    const handlePost = async () => {
         if (!gossipContent.trim()) {
             Alert.alert('Error', 'Please write something before posting');
             return;
@@ -102,10 +141,41 @@ export default function ComposeScreen() {
                 { text: 'Cancel', style: 'cancel' },
                 {
                     text: 'Post',
-                    onPress: () => {
-                        Analytics.trackCompose('post', selectedChannel, gossipContent.length);
-                        Alert.alert('Success', 'Your gossip has been posted!');
-                        router.back();
+                    onPress: async () => {
+                        setIsPosting(true);
+                        
+                        try {
+                            let imageUrl = null;
+                            
+                            if (selectedImage) {
+                                setIsUploadingImage(true);
+                                try {
+                                    imageUrl = await uploadImage(selectedImage, 'gossip');
+                                } catch (error) {
+                                    Alert.alert('Error', 'Failed to upload image. Please try again.');
+                                    setIsPosting(false);
+                                    setIsUploadingImage(false);
+                                    return;
+                                }
+                                setIsUploadingImage(false);
+                            }
+                            
+                            await gossipService.createGossip({
+                                content: gossipContent,
+                                channelId: selectedChannel,
+                                profileId: profileId as string || '1',
+                                imageUrl,
+                            });
+                            
+                            Analytics.trackCompose('post', selectedChannel, gossipContent.length);
+                            Alert.alert('Success', 'Your gossip has been posted!');
+                            router.back();
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to post gossip. Please try again.');
+                        } finally {
+                            setIsPosting(false);
+                            setIsUploadingImage(false);
+                        }
                     }
                 }
             ]
@@ -213,6 +283,18 @@ export default function ComposeScreen() {
                             autoFocus
                         />
                         
+                        {selectedImage && (
+                            <View style={styles.imagePreviewContainer}>
+                                <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
+                                <TouchableOpacity 
+                                    style={styles.removeImageButton}
+                                    onPress={handleRemoveImage}
+                                >
+                                    <Ionicons name="close-circle" size={24} color="#EF4444" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        
                         {showWarning && (
                             <View style={styles.warningBox}>
                                 <Ionicons name="warning" size={16} color="#F59E0B" />
@@ -221,9 +303,22 @@ export default function ComposeScreen() {
                         )}
                         
                         <View style={styles.inputFooter}>
-                            <View style={styles.anonymousBadge}>
-                                <Ionicons name="eye-off" size={14} color="#10B981" />
-                                <ThemedText style={styles.anonymousText}>Posting anonymously</ThemedText>
+                            <View style={styles.footerLeft}>
+                                <TouchableOpacity 
+                                    style={styles.addImageButton}
+                                    onPress={handleImagePick}
+                                    disabled={isUploadingImage || isPosting}
+                                >
+                                    <Ionicons 
+                                        name="image-outline" 
+                                        size={20} 
+                                        color={isUploadingImage ? "#9CA3AF" : "#6B7280"} 
+                                    />
+                                </TouchableOpacity>
+                                <View style={styles.anonymousBadge}>
+                                    <Ionicons name="eye-off" size={14} color="#10B981" />
+                                    <ThemedText style={styles.anonymousText}>Posting anonymously</ThemedText>
+                                </View>
                             </View>
                             <ThemedText style={[
                                 styles.charCount,
@@ -393,6 +488,33 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 16,
+    },
+    footerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    addImageButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#F3F4F6',
+    },
+    imagePreviewContainer: {
+        marginTop: 12,
+        position: 'relative',
+    },
+    imagePreview: {
+        width: '100%',
+        height: 200,
+        borderRadius: 12,
+        resizeMode: 'cover',
+    },
+    removeImageButton: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'white',
+        borderRadius: 12,
     },
     anonymousBadge: {
         flexDirection: 'row',
