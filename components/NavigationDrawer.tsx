@@ -16,6 +16,7 @@ import { ThemedText } from './ThemedText';
 import { Colors } from '../constants/Colors';
 import { useColorScheme } from 'react-native';
 import { router } from 'expo-router';
+import { BuzzDisplay } from './BuzzDisplay';
 
 const { width: screenWidth } = Dimensions.get('window');
 const DRAWER_WIDTH = screenWidth * 0.75;
@@ -84,6 +85,9 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({ isOpen, onClose }) 
                                         <View style={styles.userDetails}>
                                             <ThemedText style={styles.userName}>Anonymous User</ThemedText>
                                             <ThemedText style={styles.userHandle}>@anon_user</ThemedText>
+                                            <View style={styles.buzzContainer}>
+                                                <BuzzDisplay amount={150} size="small" />
+                                            </View>
                                         </View>
                                     </View>
                                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -175,6 +179,10 @@ const styles = StyleSheet.create({
     userHandle: {
         fontSize: 14,
         color: '#6B7280',
+        marginBottom: 8,
+    },
+    buzzContainer: {
+        alignSelf: 'flex-start',
     },
     closeButton: {
         padding: 8,

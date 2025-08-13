@@ -100,6 +100,14 @@ export default function SettingsScreen() {
                     action: () => setAnonymousMode(!anonymousMode)
                 },
                 {
+                    id: 'socialAccounts',
+                    title: 'Linked Social Accounts',
+                    subtitle: 'Manage connected accounts',
+                    icon: 'link-outline' as keyof typeof Ionicons.glyphMap,
+                    type: 'navigation' as const,
+                    route: '/social-linking'
+                },
+                {
                     id: 'blockedUsers',
                     title: 'Blocked Users',
                     subtitle: 'Manage blocked accounts',
@@ -191,7 +199,13 @@ export default function SettingsScreen() {
             <TouchableOpacity
                 key={item.id}
                 style={[styles.settingItem, { backgroundColor: colors.card }]}
-                onPress={item.action}
+                onPress={() => {
+                    if (item.route) {
+                        router.push(item.route as any);
+                    } else if (item.action) {
+                        item.action();
+                    }
+                }}
                 activeOpacity={item.type === 'toggle' ? 1 : 0.7}
             >
                 <View style={styles.settingItemLeft}>

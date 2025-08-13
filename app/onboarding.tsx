@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
+import { Analytics } from '../services/analytics';
 import {
     Alert,
     Animated,
@@ -88,6 +89,7 @@ export default function OnboardingScreen() {
         }
 
         setLoading(true);
+        Analytics.trackAuth('phone_submit');
         try {
             // Simulate API call for sending OTP
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -134,11 +136,13 @@ export default function OnboardingScreen() {
         }
 
         setLoading(true);
+        Analytics.trackAuth('otp_submit');
         try {
             // Simulate API call for OTP verification
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             // Navigate to feed on success
+            Analytics.setUserId('user_' + Date.now()); // Set user ID for tracking
             router.replace('/(tabs)/feed');
         } catch {
             Alert.alert('Error', 'Invalid OTP. Please try again.');
@@ -152,9 +156,11 @@ export default function OnboardingScreen() {
     // Handle Google Sign-In
     const handleGoogleSignIn = async () => {
         setLoading(true);
+        Analytics.trackAuth('google_signin');
         try {
             // Simulate Google Sign-In
             await new Promise(resolve => setTimeout(resolve, 2000));
+            Analytics.setUserId('user_google_' + Date.now());
             Alert.alert('Success', 'Google Sign-In successful!', [
                 { text: 'OK', onPress: () => router.replace('/(tabs)/feed') }
             ]);
