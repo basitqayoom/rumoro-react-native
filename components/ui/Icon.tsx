@@ -32,6 +32,7 @@ const ICON_MAP = {
     // Communication
     'phone': { library: 'ionicons', name: 'call' },
     'message': { library: 'ionicons', name: 'chatbubble' },
+    'message-circle': { library: 'ionicons', name: 'chatbubble-outline' },
     'mail': { library: 'ionicons', name: 'mail' },
     'send': { library: 'ionicons', name: 'send' },
 
@@ -83,6 +84,7 @@ const ICON_MAP = {
     'menu': { library: 'ionicons', name: 'menu' },
     'dots': { library: 'ionicons', name: 'ellipsis-horizontal' },
     'flag': { library: 'ionicons', name: 'flag' },
+    'lightbulb': { library: 'ionicons', name: 'bulb' },
 };
 
 const getIconComponent = (library: IconLibrary) => {

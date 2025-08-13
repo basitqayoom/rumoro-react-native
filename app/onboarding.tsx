@@ -13,11 +13,12 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '../components/ThemedText';
 import { Button } from '../components/ui/Button';
 import { CountryCodePicker, DEFAULT_COUNTRY } from '../components/ui/CountryCodePicker';
 import { Icon } from '../components/ui/Icon';
+import { InstagramIcon } from '../components/ui/InstagramIcon';
 import { Logo } from '../components/ui/Logo';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -40,7 +41,7 @@ const colors = {
     },
 };
 
-type OnboardingStep = 'auth-selection' | 'phone-input' | 'otp-verification';
+type OnboardingStep = 'auth-selection' | 'phone-input' | 'otp-verification' | 'instagram-linking';
 
 export default function OnboardingScreen() {
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -48,12 +49,10 @@ export default function OnboardingScreen() {
     const [otp, setOtp] = useState(['', '', '', '']);
     const [resendTimer, setResendTimer] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [currentStep, setCurrentStep] = useState<OnboardingStep>('auth-selection');
 
     const slideAnim = useRef(new Animated.Value(0)).current;
     const otpInputs = useRef<TextInput[]>([]);
     const phoneInputRef = useRef<TextInput>(null);
-    const insets = useSafeAreaInsets();
 
     // Resend OTP timer effect
     useEffect(() => {
@@ -74,7 +73,6 @@ export default function OnboardingScreen() {
             duration: 300,
             useNativeDriver: true,
         }).start();
-        setCurrentStep(step);
 
         // Focus phone input when navigating to phone input screen
         if (step === 'phone-input') {
@@ -85,14 +83,26 @@ export default function OnboardingScreen() {
     };
 
     const getStepIndex = (step: OnboardingStep): number => {
-        const steps: OnboardingStep[] = ['auth-selection', 'phone-input', 'otp-verification'];
+        const steps: OnboardingStep[] = ['auth-selection', 'phone-input', 'otp-verification', 'instagram-linking'];
         return steps.indexOf(step);
+    };
+
+    // Handle phone number input
+    const handlePhoneNumberChange = (value: string) => {
+        // Only allow numbers
+        const numericValue = value.replace(/[^0-9]/g, '');
+        setPhoneNumber(numericValue);
+    };
+
+    // Check if phone number is valid (reaches max length)
+    const isPhoneNumberValid = () => {
+        return phoneNumber.length === selectedCountry.maxLength;
     };
 
     // Handle phone number submission
     const handlePhoneSubmit = async () => {
-        if (!phoneNumber.trim()) {
-            Alert.alert('Error', 'Please enter a valid phone number');
+        if (!phoneNumber.trim() || !isPhoneNumberValid()) {
+            Alert.alert('Error', `Please enter a valid ${selectedCountry.maxLength}-digit phone number`);
             return;
         }
 
@@ -118,17 +128,20 @@ export default function OnboardingScreen() {
 
     // Handle OTP input
     const handleOtpChange = (value: string, index: number) => {
+        // Only allow numbers
+        const numericValue = value.replace(/[^0-9]/g, '');
+
         const newOtp = [...otp];
-        newOtp[index] = value;
+        newOtp[index] = numericValue;
         setOtp(newOtp);
 
         // Auto-focus next input
-        if (value && index < 3) {
+        if (numericValue && index < 3) {
             otpInputs.current[index + 1]?.focus();
         }
 
         // Auto-submit when all fields are filled
-        if (index === 3 && value && newOtp.every(digit => digit !== '')) {
+        if (index === 3 && numericValue && newOtp.every(digit => digit !== '')) {
             handleOtpVerification(newOtp.join(''));
         }
     };
@@ -147,8 +160,8 @@ export default function OnboardingScreen() {
             // Simulate API call for OTP verification
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            // Navigate to feed on success
-            router.replace('/feed');
+            // Navigate to Instagram linking screen on success
+            navigateToStep('instagram-linking');
         } catch {
             Alert.alert('Error', 'Invalid OTP. Please try again.');
             setOtp(['', '', '', '']);
@@ -174,6 +187,27 @@ export default function OnboardingScreen() {
         }
     };
 
+    // Handle Instagram linking
+    const handleInstagramLinking = async () => {
+        setLoading(true);
+        try {
+            // Simulate Instagram linking
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            Alert.alert('Success', 'Instagram linked successfully!', [
+                { text: 'OK', onPress: () => router.replace('/feed') }
+            ]);
+        } catch {
+            Alert.alert('Error', 'Failed to link Instagram. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handle skip Instagram
+    const handleSkipInstagram = () => {
+        router.replace('/feed');
+    };
+
     // Handle resend OTP
     const handleResendOtp = async () => {
         if (resendTimer > 0) return;
@@ -189,6 +223,122 @@ export default function OnboardingScreen() {
             setLoading(false);
         }
     };
+
+    // Instagram Linking Screen
+    const renderInstagramLinking = () => (
+        <View style={styles.stepContainer}>
+            <View style={styles.compactHeader}>
+                <ThemedText type="h2" style={styles.compactTitle}>
+                    Let Others Find You
+                </ThemedText>
+                <ThemedText type="body" style={styles.compactSubtitle}>
+                    Connect your Instagram so people can find your profile and gossip about you anonymously
+                </ThemedText>
+            </View>
+
+            <ScrollView
+                contentContainerStyle={styles.instagramScrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                style={styles.instagramScrollView}
+            >
+                <View style={styles.instagramMainContent}>
+                    <View style={styles.instagramHeroSection}>
+                        <View style={styles.instagramIconContainer}>
+                            <InstagramIcon size={48} color="#E4405F" />
+                        </View>
+
+                        <ThemedText type="h3" style={styles.instagramMainHeading}>
+                            Be Part of the Conversation
+                        </ThemedText>
+                        <ThemedText type="body" style={styles.instagramMainDescription}>
+                            Link your Instagram so others can find you by your handle and share anonymous gossip about you.
+                        </ThemedText>
+                    </View>
+
+                    <View style={styles.anonymityHighlight}>
+                        <View style={styles.anonymityHeader}>
+                            <Icon name="eye-off" size={20} color={colors.primary[600]} style={styles.anonymityIcon} />
+                            <ThemedText style={styles.anonymityTitle}>Stay Anonymous</ThemedText>
+                        </View>
+                        <ThemedText style={styles.anonymityText}>
+                            You will still be <ThemedText style={styles.anonymityEmphasis}>completely anonymous</ThemedText> while posting gossip about others
+                        </ThemedText>
+                    </View>
+
+                    <View style={styles.benefitsSection}>
+                        <View style={styles.benefitRow}>
+                            <View style={styles.benefitIconBg}>
+                                <Icon name="users" size={16} color={colors.primary[600]} />
+                            </View>
+                            <View style={styles.benefitContent}>
+                                <ThemedText type="caption" style={styles.benefitTitle}>Discoverable</ThemedText>
+                                <ThemedText type="caption" style={styles.benefitDescription}>
+                                    People can find you by your Instagram handle
+                                </ThemedText>
+                            </View>
+                        </View>
+
+                        <View style={styles.benefitRow}>
+                            <View style={styles.benefitIconBg}>
+                                <Icon name="message-circle" size={16} color={colors.primary[600]} />
+                            </View>
+                            <View style={styles.benefitContent}>
+                                <ThemedText type="caption" style={styles.benefitTitle}>Anonymous Gossip</ThemedText>
+                                <ThemedText type="caption" style={styles.benefitDescription}>
+                                    Receive anonymous posts about yourself
+                                </ThemedText>
+                            </View>
+                        </View>
+
+                        <View style={[styles.benefitRow, styles.benefitRowLast]}>
+                            <View style={styles.benefitIconBg}>
+                                <Icon name="shield" size={16} color={colors.primary[600]} />
+                            </View>
+                            <View style={styles.benefitContent}>
+                                <ThemedText type="caption" style={styles.benefitTitle}>Privacy Protected</ThemedText>
+                                <ThemedText type="caption" style={styles.benefitDescription}>
+                                    Your Instagram info stays completely private
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.proTipSection}>
+                        <View style={styles.proTipContainer}>
+                            <Icon name="lightbulb" size={18} color={colors.primary[600]} style={styles.proTipBulb} />
+                            <View style={styles.proTipTextContainer}>
+                                <ThemedText style={styles.proTipLabel}>Pro tip</ThemedText>
+                                <ThemedText style={styles.proTipMessage}>
+                                    The more discoverable you are, the more interesting gossip you&apos;ll get!
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </ScrollView>
+
+            <View style={styles.buttonContainer}>
+                <Button
+                    title="Connect Instagram"
+                    variant="primary"
+                    size="lg"
+                    fullWidth
+                    loading={loading}
+                    onPress={handleInstagramLinking}
+                    iconName="instagram"
+                    iconColor="#FFFFFF"
+                    style={styles.instagramConnectButton}
+                />
+                <TouchableOpacity onPress={handleSkipInstagram} style={styles.skipButton}>
+                    <ThemedText type="body" style={styles.skipText}>
+                        I&apos;ll Do This Later
+                    </ThemedText>
+                    <Icon name="arrow-right" size={16} color={colors.neutral.ink600} style={styles.skipArrow} />
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 
 
 
@@ -283,7 +433,7 @@ export default function OnboardingScreen() {
                                 style={styles.phoneInput}
                                 placeholder="Phone number"
                                 value={phoneNumber}
-                                onChangeText={setPhoneNumber}
+                                onChangeText={handlePhoneNumberChange}
                                 keyboardType="phone-pad"
                                 maxLength={selectedCountry.maxLength}
                             />
@@ -306,7 +456,7 @@ export default function OnboardingScreen() {
                         fullWidth
                         loading={loading}
                         onPress={handlePhoneSubmit}
-                        disabled={!phoneNumber.trim()}
+                        disabled={!phoneNumber.trim() || !isPhoneNumberValid()}
                     />
                 </View>
             </KeyboardAvoidingView>
@@ -408,7 +558,7 @@ export default function OnboardingScreen() {
     );
 
     return (
-        <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+        <SafeAreaView style={[styles.container, { paddingTop: 0 }]}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.neutral.surface0} />
 
             <Animated.View
@@ -428,6 +578,9 @@ export default function OnboardingScreen() {
                 <View style={styles.step}>
                     {renderOtpVerification()}
                 </View>
+                <View style={styles.step}>
+                    {renderInstagramLinking()}
+                </View>
             </Animated.View>
         </SafeAreaView>
     );
@@ -442,7 +595,7 @@ const styles = StyleSheet.create({
     stepsWrapper: {
         flex: 1,
         flexDirection: 'row',
-        width: screenWidth * 3, // Total width for 3 screens
+        width: screenWidth * 4, // Total width for 4 screens
     },
     step: {
         width: screenWidth, // Each step takes full screen width
@@ -455,16 +608,16 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        paddingTop: 20,
-        paddingBottom: 24,
+        paddingTop: 8,
+        paddingBottom: 16,
     },
     compactHeader: {
         alignItems: 'center',
-        paddingTop: 20,
-        paddingBottom: 24,
+        paddingTop: 8,
+        paddingBottom: 16,
     },
     logoContainer: {
-        marginBottom: 24,
+        marginBottom: 16,
         alignItems: 'center',
     },
     stepIcon: {
@@ -543,8 +696,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-start',
         padding: 8,
-        marginTop: 4,
-        marginBottom: 16,
+        marginTop: 0,
+        marginBottom: 8,
         marginLeft: -8, // Align with screen edge accounting for padding
     },
     backText: {
@@ -586,7 +739,8 @@ const styles = StyleSheet.create({
     },
     otpContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
+        gap: 12,
         paddingHorizontal: 16,
         marginBottom: 24,
     },
@@ -643,5 +797,270 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingBottom: 40,
         backgroundColor: colors.neutral.surface0,
+    },
+    instagramContainer: {
+        alignItems: 'center',
+        paddingVertical: 32,
+    },
+    instagramContent: {
+        alignItems: 'center',
+        paddingHorizontal: 24,
+    },
+    instagramHeading: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: colors.neutral.ink900,
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    instagramDescription: {
+        textAlign: 'center',
+        color: colors.neutral.ink600,
+        lineHeight: 22,
+        marginBottom: 24,
+    },
+    benefitsList: {
+        width: '100%',
+        gap: 12,
+    },
+    benefitItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+    },
+    benefitDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: colors.primary[500],
+        marginRight: 12,
+    },
+    benefitText: {
+        flex: 1,
+        color: colors.neutral.ink600,
+        fontSize: 14,
+        lineHeight: 20,
+    },
+    instagramButton: {
+        marginBottom: 16,
+        backgroundColor: colors.primary[500],
+    },
+    instagramConnectButton: {
+        backgroundColor: colors.primary[500],
+        borderRadius: 12,
+        marginBottom: 12,
+    },
+    instagramVisualSection: {
+        alignItems: 'center',
+        width: '100%',
+    },
+    instagramIconWrapper: {
+        alignItems: 'center',
+        marginBottom: 28,
+        padding: 20,
+        borderRadius: 50,
+        backgroundColor: colors.primary[50],
+    },
+    instagramContentCard: {
+        backgroundColor: colors.neutral.surface0,
+        borderRadius: 16,
+        padding: 24,
+        width: '100%',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    benefitIconBg: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: colors.primary[50],
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+    proTipCard: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        backgroundColor: colors.primary[50],
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 20,
+        borderLeftWidth: 3,
+        borderLeftColor: colors.primary[500],
+    },
+    proTipIcon: {
+        marginRight: 12,
+        marginTop: 2,
+    },
+    proTipText: {
+        flex: 1,
+        fontSize: 13,
+        lineHeight: 18,
+        color: colors.neutral.ink600,
+    },
+    proTipLabel: {
+        fontWeight: '600',
+        color: colors.primary[600],
+    },
+    skipContainer: {
+        alignItems: 'center',
+        paddingVertical: 16,
+    },
+    skipText: {
+        color: colors.neutral.ink600,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    skipArrow: {
+        marginLeft: 8,
+    },
+    primaryButton: {
+        marginBottom: 12,
+    },
+    skipButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        marginTop: 8,
+    },
+    // New Instagram screen styles
+    instagramScrollContent: {
+        paddingHorizontal: 0,
+        paddingBottom: 40,
+        flexGrow: 1,
+    },
+    instagramScrollView: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
+    instagramMainContent: {
+        flex: 1,
+        justifyContent: 'flex-start',
+    },
+    instagramHeroSection: {
+        alignItems: 'center',
+        paddingVertical: 20,
+    },
+    instagramIconContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: colors.primary[50],
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    instagramMainHeading: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: colors.neutral.ink900,
+        textAlign: 'center',
+        marginBottom: 12,
+    },
+    instagramMainDescription: {
+        fontSize: 16,
+        color: colors.neutral.ink600,
+        textAlign: 'center',
+        lineHeight: 22,
+        paddingHorizontal: 12,
+    },
+    benefitsSection: {
+        backgroundColor: colors.neutral.surface0,
+        borderRadius: 16,
+        padding: 24,
+        marginVertical: 24,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        elevation: 2,
+    },
+    benefitRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
+    benefitRowLast: {
+        marginBottom: 0,
+    },
+    benefitContent: {
+        flex: 1,
+        marginLeft: 12,
+    },
+    benefitTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.neutral.ink900,
+        marginBottom: 4,
+    },
+    benefitDescription: {
+        fontSize: 13,
+        color: colors.neutral.ink600,
+        lineHeight: 18,
+    },
+    proTipSection: {
+        marginBottom: 8,
+    },
+    proTipContainer: {
+        flexDirection: 'row',
+        backgroundColor: colors.primary[50],
+        borderRadius: 12,
+        padding: 16,
+        borderLeftWidth: 4,
+        borderLeftColor: colors.primary[500],
+    },
+    proTipBulb: {
+        marginRight: 12,
+        marginTop: 1,
+    },
+    proTipTextContainer: {
+        flex: 1,
+    },
+    proTipMessage: {
+        fontSize: 13,
+        color: colors.neutral.ink600,
+        lineHeight: 18,
+        marginTop: 2,
+    },
+    // Anonymity highlight styles
+    anonymityHighlight: {
+        backgroundColor: colors.primary[100],
+        borderRadius: 12,
+        padding: 16,
+        marginVertical: 20,
+        borderLeftWidth: 4,
+        borderLeftColor: colors.primary[600],
+    },
+    anonymityHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    anonymityIcon: {
+        marginRight: 8,
+    },
+    anonymityTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.primary[700],
+    },
+    anonymityText: {
+        fontSize: 14,
+        color: colors.neutral.ink600,
+        lineHeight: 20,
+    },
+    anonymityEmphasis: {
+        fontWeight: '600',
+        color: colors.primary[600],
     },
 });

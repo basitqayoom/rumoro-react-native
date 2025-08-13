@@ -11,6 +11,7 @@ import { Colors, tokens } from '../../constants/Colors';
 import { ThemedText } from '../ThemedText';
 import { GoogleIcon } from './GoogleIcon';
 import { Icon } from './Icon';
+import { InstagramIcon } from './InstagramIcon';
 
 type ButtonProps = TouchableOpacityProps & {
     title?: string;
@@ -133,6 +134,12 @@ export function Button({
             ) : iconName === 'google' ? (
                 <GoogleIcon
                     size={iconSize}
+                    style={{ marginRight: title ? tokens.spacing.sm : 0 }}
+                />
+            ) : iconName === 'instagram' ? (
+                <InstagramIcon
+                    size={iconSize}
+                    color={iconColor || getTextColor()}
                     style={{ marginRight: title ? tokens.spacing.sm : 0 }}
                 />
             ) : iconName ? (
