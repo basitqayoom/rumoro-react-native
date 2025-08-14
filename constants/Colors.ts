@@ -22,6 +22,14 @@ export const Colors = {
     },
 
     // Neutral colors
+    neutral: {
+      surface0: "#FFFFFF",
+      surfaceAlt: "#F8F9FB",
+      ink900: "#111114",
+      ink700: "#2B2E3A",
+      ink100: "#F3F4F6",
+      muted500: "#6B7280",
+    },
     text: "#111114", // ink900
     textSecondary: "#2B2E3A", // ink700
     textMuted: "#6B7280", // muted500
@@ -60,6 +68,14 @@ export const Colors = {
     },
 
     // Dark theme neutrals
+    neutral: {
+      surface0: "#101114",
+      surfaceAlt: "#171821",
+      ink900: "#F5F6FA",
+      ink700: "#F5F6FA",
+      ink100: "#374151",
+      muted500: "#9CA3AF",
+    },
     text: "#F5F6FA", // inkD
     textSecondary: "#F5F6FA",
     textMuted: "#9CA3AF", // mutedD

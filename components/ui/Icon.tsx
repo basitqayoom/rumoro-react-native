@@ -85,6 +85,15 @@ const ICON_MAP = {
     'dots': { library: 'ionicons', name: 'ellipsis-horizontal' },
     'flag': { library: 'ionicons', name: 'flag' },
     'lightbulb': { library: 'ionicons', name: 'bulb' },
+
+    // Drawer icons
+    'person': { library: 'ionicons', name: 'person' },
+    'link': { library: 'ionicons', name: 'link' },
+    'add-circle': { library: 'ionicons', name: 'add-circle' },
+    'bookmark': { library: 'ionicons', name: 'bookmark' },
+    'information-circle': { library: 'ionicons', name: 'information-circle' },
+    'log-out': { library: 'ionicons', name: 'log-out' },
+    'chevron-forward': { library: 'ionicons', name: 'chevron-forward' },
 };
 
 const getIconComponent = (library: IconLibrary) => {

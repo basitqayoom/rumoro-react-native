@@ -1,3 +1,4 @@
+/* eslint-disable import/namespace */
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
@@ -29,6 +30,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="feed" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   );
